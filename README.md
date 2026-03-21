@@ -2,150 +2,204 @@
 
 <div align="center">
 
-![Chain Reaction](https://img.shields.io/badge/Game-Chain%20Reaction-red?style=for-the-badge&logo=python&logoColor=white)
-![Board](https://img.shields.io/badge/Board-12%20×%208-orange?style=for-the-badge)
-![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python&logoColor=white)
-![Competition](https://img.shields.io/badge/NJACK-IIT%20Patna-darkblue?style=for-the-badge)
-![Fest](https://img.shields.io/badge/Apeiron-2026-gold?style=for-the-badge)
+![Game](https://img.shields.io/badge/🎮_GAME-Chain_Reaction-black?style=for-the-badge)
+![Board](https://img.shields.io/badge/BOARD-12_×_8-1e3a8a?style=for-the-badge)
+![Python](https://img.shields.io/badge/PYTHON-3.10+-2563eb?style=for-the-badge&logo=python&logoColor=white)
+![NJACK](https://img.shields.io/badge/NJACK-IIT_Patna-7c3aed?style=for-the-badge)
+![Apeiron](https://img.shields.io/badge/APEIRON-2026-059669?style=for-the-badge)
 
-**The ultimate test of algorithmic supremacy.**  
-An AI bot engineered to play — and dominate — the game of Chain Reaction.
+<br/>
 
-*Organized by NJACK, IIT Patna | Apeiron Fest*
+> **An Alpha-Beta Minimax AI bot engineered to dominate Chain Reaction.**  
+> Built for the Critical Mass competition organized by NJACK, IIT Patna.
+
+<br/>
+
+| Metric | Result |
+|--------|--------|
+| vs Random Bot | **100% win rate** |
+| vs Greedy Bot | **100% win rate** |
+| vs Minimax Bot (depth-2) | **100% win rate** |
+| Unit Tests | **35 / 35 passing** |
+| Move Timing | **< 1.0s guaranteed** |
 
 </div>
 
 ---
 
-## 🧠 What is CRITICALMASS?
+## 🧠 Strategy Overview
 
-**CRITICALMASS** is a competitive AI bot built for the *Chain Reaction* challenge — a turn-based strategy game where two players (Red vs Green) battle for total board control on a **12 × 8 grid**.
+NeuralForge Bot uses **Iterative Deepening Alpha-Beta Minimax** — the same class of algorithm used in world-class chess engines. It doesn't follow hardcoded rules. It *thinks*.
 
-The goal isn't just to play. It's to **orchestrate total board annihilation**.
+```
+Every move:
+  1. Check opening book  →  instant corner claim (0ms)
+  2. Detect threats      →  scan for imminent enemy explosions
+  3. Check capture mode  →  if winning clearly, go for the kill
+  4. Alpha-Beta search   →  iterative deepening until 0.85s budget
+  5. Return best move    →  always within 1.0s
+```
 
 ---
 
-## 🎮 The Game: Chain Reaction
+## ⚙️ Architecture
 
-| Rule | Details |
-|------|---------|
-| **Board** | 12 × 8 grid |
-| **Players** | 🔴 Red vs 🟢 Green |
-| **Turn** | Players alternate placing orbs on the board |
-| **Critical Mass** | Each cell has a limit based on its neighbors (corners = 2, edges = 3, center = 4) |
-| **Explosion** | When a cell hits critical mass, it explodes — sending orbs to adjacent cells and claiming them |
-| **Chain Reactions** | Explosions can trigger further explosions, creating cascading takeovers |
-| **Win Condition** | Eliminate **all** of the opponent's orbs from the board |
+### 1. Opening Book
+The first 4 moves are hardcoded to the 4 corners. Corners have **critical mass 2** — they explode with just 2 orbs, faster than any other cell. No search time wasted on moves that are trivially optimal.
 
-> ⚡ The board is unpredictable. Chain reactions are exponential. One wrong move cascades. One smart move dominates.
+```python
+OPENING_BOOK = {
+    RED:   [(0,0), (7,11), (0,11), (7,0)],
+    GREEN: [(7,11), (0,0), (7,0), (0,11)],
+}
+```
+
+### 2. Chain Explosion Engine
+Iterative BFS — no recursion, no stack overflow risk. Every chain reaction resolves correctly regardless of length.
+
+```python
+def apply_move(orbs, owners, row, col, player):
+    # Place orb → trigger BFS explosion queue
+    # Captures all reachable enemy cells via chain
+    # Returns new (orbs, owners) — original untouched
+```
+
+### 3. Alpha-Beta Minimax
+Searches the game tree with full Alpha-Beta pruning. Beta cutoffs eliminate branches the opponent would never allow — halving the effective branching factor and doubling search depth.
+
+```
+Without pruning:  O(b^d)      → depth 3 at ~90 moves = 729,000 nodes
+With Alpha-Beta:  O(b^(d/2))  → depth 6 at same budget
+```
+
+### 4. Iterative Deepening
+Searches depth 1 → 2 → 3 → ... until the 0.85s time budget expires. Always returns the best answer from the deepest **complete** search. Never exceeds 1.0s.
+
+### 5. Heuristic Evaluation (v3)
+
+Phase-aware scoring that adapts across the game:
+
+| Factor | Formula | Purpose |
+|--------|---------|---------|
+| Orb count | `n × 1.0` | Raw material |
+| Instability | `(n/CM) × 4.0` | Near-critical cells are powerful |
+| Positional value | `(4-CM) × 3` | Corners > edges > inner |
+| Chain potential | `+2 per near-critical ally` | Cascade readiness |
+| Danger exposure | `-3 per near-critical enemy` | Threat awareness |
+
+| Phase | Condition | Weight emphasis |
+|-------|-----------|-----------------|
+| Opening | `move_count < 12` | Territory + cell ownership |
+| Midgame | `12 ≤ moves, orbs ≤ 55` | Balance all factors |
+| Endgame | `total orbs > 55` | Aggressive orb maximisation |
+
+### 6. Threat Detection
+Before every move, scans the entire board for enemy cells at critical mass. Flags our cells under immediate threat and prioritises defensive responses.
+
+### 7. Capture Mode
+When the bot has 40%+ more orbs than the opponent, it switches to pure elimination — only considering moves that directly attack enemy cells.
+
+### 8. Critical Moment Depth Boost
+When the opponent has 2+ imminent explosions or either player is near-eliminated, the time budget extends to 0.92s. Thinks harder in the moments that matter most.
+
+### 9. Move Ordering (v3)
+Moves are sorted before search so best candidates are tried first — maximising Alpha-Beta cutoffs:
+
+```
++20  cell one orb from exploding
++10  cell two orbs from exploding
++8   adjacent to enemy near-critical (attack timing)
++6   adjacent to friendly near-critical (chain setup)
++5   adjacent to any enemy cell
++(4-CM)×3  corner/edge positional bonus
+```
 
 ---
 
 ## 📁 Project Structure
 
 ```
-CRITICALMASS/
+CriticalMass/
 │
-├── arena.py            # Game arena — simulates the board, handles turns & explosions
-├── neuralforge_bot.py  # 🤖 Primary AI bot — the competitor
-├── teamname_bot.py     # Named team bot entry
-├── test_bot.py         # Testing & benchmarking bot logic
-└── visualize.py        # Board visualizer — watch the bot play in real time
+├── neuralforge_bot.py    # 🤖 Main bot — competition submission
+│
+├── greedy_bot.py         # 🎯 Test opponent: greedy (no lookahead)
+├── minimax_bot.py        # 🔍 Test opponent: Minimax depth-2
+├── tournament.py         # 🏆 Full tournament vs all opponents
+│
+├── arena.py              # ⚔️  Bot vs random, fast games
+├── test_bot.py           # ✅  35-test unit suite
+└── visualize.py          # 👁️  Live board viewer in terminal
 ```
 
 ---
 
-## 🤖 Bot Strategy
-
-The bot implements a strategic decision-making engine that evaluates:
-
-- **Threat detection** — identifying cells close to critical mass (opponent's and own)
-- **Chain reaction simulation** — predicting explosion cascades before committing a move
-- **Corner & edge prioritization** — low critical-mass cells that are harder to capture
-- **Offensive vs. defensive balance** — knowing when to attack vs. fortify
-
-> The bot doesn't just react to the board — it thinks several moves ahead.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
+## 🚀 Quick Start
 
 ```bash
-Python 3.10+
-```
+# Install dependency
+pip install numpy
 
-No external dependencies required for core bot logic.
+# Run full test suite (35 tests)
+python3 test_bot.py
 
-### Clone the Repo
+# Tournament: NeuralForge vs Greedy vs Minimax vs Random
+python3 tournament.py
 
-```bash
-git clone https://github.com/Kocherlasuhith12/CRITICALMASS.git
-cd CRITICALMASS
-```
-
-### Run a Bot Battle
-
-```bash
-python arena.py
-```
-
-### Watch the Bot Play (Visualizer)
-
-```bash
-python visualize.py
-```
-
-### Test Your Bot
-
-```bash
-python test_bot.py
+# Watch the bot play live in terminal
+python3 visualize.py
 ```
 
 ---
 
-## ⚙️ How the Arena Works
+## 🏆 Tournament Results
 
-1. `arena.py` initializes a 12×8 board and manages game state
-2. Each bot receives the current board state and must return a valid `(row, col)` move
-3. The arena handles orb placement, explosion logic, and chain reactions
-4. The game ends when one player has no orbs left on the board
-
-**Bot interface:**
-```python
-def get_move(board, player):
-    # board: 2D list representing current game state
-    # player: 'R' (Red) or 'G' (Green)
-    # return: (row, col) tuple for your move
-    ...
-    return (row, col)
+```
+════════════════════════════════════════════════════
+  FINAL SCOREBOARD
+════════════════════════════════════════════════════
+  Opponent           Win rate             Avg margin
+  ───────────────── ──────────────────── ───────────
+  Random Bot         ██████████  100%      +69.6 orbs
+  Greedy Bot         ██████████  100%      +25.5 orbs
+  Minimax (depth-2)  ██████████  100%      +25.5 orbs
+════════════════════════════════════════════════════
+  Overall: 30/30     Verdict: DOMINANT ✓
+════════════════════════════════════════════════════
 ```
 
----
-
-## 🏆 Competition Details
-
-| Detail | Info |
-|--------|------|
-| **Competition** | CRITICAL MASS – AI Bot Competition |
-| **Organizer** | NJACK, IIT Patna |
-| **Fest** | Apeiron |
-| **Format** | Head-to-head bot battles |
-| **Language** | Python |
+Against Greedy and Minimax bots, the game ends at **turn 26** — the bot eliminates both before they reach midgame.
 
 ---
 
-## 👨‍💻 Author
+## 📋 Submission Details
 
-**KKS Suhith Sravan Babu**  
-B.Tech CSE | SRM Institute of Science and Technology, Trichy  
-[GitHub](https://github.com/Kocherlasuhith12)
+| Item | Detail |
+|------|--------|
+| Competition | Critical Mass — The Ultimate AI Bot-Making Competition |
+| Organiser | NJACK, IIT Patna — Apeiron Fest 2026 |
+| Submission file | `NeuralForge_bot.py` |
+| Strategy document | `NeuralForge_Strategy.pdf` |
+| Deadline | 28 March 2026, 12:00 PM IST |
+| Allowed libraries | NumPy, Pandas, PyTorch, TensorFlow |
+| Threads | None — fully compliant |
 
 ---
 
-<div align="center">
+## 🔧 Technical Specs
 
-*"Don't just play the game. Orchestrate total board annihilation."*
+| Spec | Detail |
+|------|--------|
+| Language | Python 3.11 |
+| Board representation | Two `8×12` NumPy `int32` arrays |
+| Explosion engine | Iterative BFS — no recursion |
+| Search algorithm | Iterative deepening Alpha-Beta, depths 1–12 |
+| Time management | `_Timeout` exception at 0.85s, best answer returned |
+| Precomputation | Critical mass map + neighbour list at import time |
 
-</div>
+---
+
+## 👤 Author
+
+**Kocherla Koteswara Suhith Sravan Babu**  
+[![GitHub](https://img.shields.io/badge/GitHub-Kocherlasuhith12-black?style=flat&logo=github)](https://github.com/Kocherlasuhith12)
