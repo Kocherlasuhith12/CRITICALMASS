@@ -7,7 +7,7 @@ Usage: python3 tournament.py
 import random, time, sys
 import numpy as np
 
-from neuralforge_bot import (
+from NeuralForge_bot import (
     ROWS, COLS, RED, GREEN, EMPTY,
     make_state, apply_move, get_winner,
     get_valid_moves, get_best_move, count_orbs
@@ -124,7 +124,7 @@ def main():
     print("=" * 52)
 
     # Patch time limit for this test run
-    import neuralforge_bot as nb
+    import NeuralForge_bot as nb
     nb.TIME_LIMIT = NEURALFORGE_TIME
 
     scoreboard = []
