@@ -4,7 +4,7 @@ Usage: python3 test_bot.py
 All tests should pass before submitting.
 """
 
-from neuralforge_bot import *
+from NeuralForge_bot import *
 import time
 
 PASS = "✓"
@@ -130,17 +130,23 @@ for i in range(3):
     print(f"    Call {i+1}: {elapsed:.3f}s  move={mv}")
 check(all_ok, f"All moves under 1.0s (worst={worst:.3f}s)")
 
-# ── Test 10: get_move interface ──────────────────────────
+# ── Test 10: get_move interface (official competition format) ──
 print("\n[10] get_move() — competition interface")
-board = {
-    'orbs':   [[0]*COLS for _ in range(ROWS)],
-    'owners': [[0]*COLS for _ in range(ROWS)]
-}
-mv = get_move(board, RED, 0)
-check(isinstance(mv, tuple),         "Returns a tuple")
-check(len(mv) == 2,                  "Tuple has 2 elements")
-check(0 <= mv[0] < ROWS,            f"Row {mv[0]} in range [0,{ROWS})")
-check(0 <= mv[1] < COLS,            f"Col {mv[1]} in range [0,{COLS})")
+# Official format: 2D list of (owner_id, orb_count) tuples
+# Empty cell = (None, 0), player_id = 0 or 1
+state_empty = [[(None, 0)] * COLS for _ in range(ROWS)]
+mv = get_move(state_empty, 0)
+check(isinstance(mv, tuple),  "Returns a tuple")
+check(len(mv) == 2,           "Tuple has 2 elements")
+check(0 <= mv[0] < ROWS,     f"Row {mv[0]} in range [0,{ROWS})")
+check(0 <= mv[1] < COLS,     f"Col {mv[1]} in range [0,{COLS})")
+mv2 = get_move(state_empty, 1)
+check(isinstance(mv2, tuple), "player_id=1 returns valid move")
+state_mid = [[(None, 0)] * COLS for _ in range(ROWS)]
+state_mid[0][0]  = (0, 1)
+state_mid[7][11] = (1, 1)
+mv3 = get_move(state_mid, 0)
+check(isinstance(mv3, tuple), "Mid-game state returns valid move")
 
 # ── Summary ──────────────────────────────────────────────
 print()

@@ -5,7 +5,7 @@ No lookahead. No search. Just instant gratification.
 This is what most beginner students submit.
 """
 
-from neuralforge_bot import (
+from NeuralForge_bot import (
     ROWS, COLS, RED, GREEN, EMPTY,
     CRITICAL_MASS, NEIGHBORS,
     make_state, apply_move, get_winner, get_valid_moves, count_orbs

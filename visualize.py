@@ -3,7 +3,7 @@ visualize.py — Watch the bot play live in your terminal
 Usage: python3 visualize.py
 """
 
-from neuralforge_bot import *
+from NeuralForge_bot import *
 import random, os, time
 
 def clear():

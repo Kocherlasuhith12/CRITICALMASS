@@ -4,7 +4,7 @@ Caps at 60 turns — winner decided by orb count if no elimination
 Usage: python3 arena.py
 """
 
-from neuralforge_bot import *
+from NeuralForge_bot import *
 import random, time
 
 TEST_TIME_LIMIT = 0.1   # fast for testing; competition uses 0.85s
