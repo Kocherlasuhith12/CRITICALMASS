@@ -10,8 +10,8 @@
 
 <br/>
 
-> **An Alpha-Beta Minimax AI bot engineered to dominate Chain Reaction.**  
-> Built for the Critical Mass competition organized by NJACK, IIT Patna.
+> **An Alpha-Beta Minimax AI bot engineered to dominate Chain Reaction.**
+> Built for the Critical Mass competition organized by NJACK, IIT Patna — Apeiron Fest 2026.
 
 <br/>
 
@@ -20,8 +20,9 @@
 | vs Random Bot | **100% win rate** |
 | vs Greedy Bot | **100% win rate** |
 | vs Minimax Bot (depth-2) | **100% win rate** |
-| Unit Tests | **35 / 35 passing** |
+| Unit Tests | **37 / 37 passing** |
 | Move Timing | **< 1.0s guaranteed** |
+| Competition Interface | **`get_move(state, player_id)` ✓** |
 
 </div>
 
@@ -103,7 +104,7 @@ When the bot has 40%+ more orbs than the opponent, it switches to pure eliminati
 When the opponent has 2+ imminent explosions or either player is near-eliminated, the time budget extends to 0.92s. Thinks harder in the moments that matter most.
 
 ### 9. Move Ordering (v3)
-Moves are sorted before search so best candidates are tried first — maximising Alpha-Beta cutoffs:
+Moves sorted before search so best candidates are tried first — maximising Alpha-Beta cutoffs:
 
 ```
 +20  cell one orb from exploding
@@ -121,15 +122,17 @@ Moves are sorted before search so best candidates are tried first — maximising
 ```
 CriticalMass/
 │
-├── neuralforge_bot.py    # 🤖 Main bot — competition submission
+├── NeuralForge_bot.py    # 🤖 Submit this — competition entry
+├── neuralforge_bot.py    # 🔧 Local development copy
 │
 ├── greedy_bot.py         # 🎯 Test opponent: greedy (no lookahead)
 ├── minimax_bot.py        # 🔍 Test opponent: Minimax depth-2
 ├── tournament.py         # 🏆 Full tournament vs all opponents
 │
-├── arena.py              # ⚔️  Bot vs random, fast games
-├── test_bot.py           # ✅  35-test unit suite
-└── visualize.py          # 👁️  Live board viewer in terminal
+├── arena.py              # ⚔️  Quick bot vs random games
+├── test_bot.py           # ✅  37-test unit suite
+├── visualize.py          # 👁️  Live board viewer in terminal
+└── README.md
 ```
 
 ---
@@ -140,7 +143,7 @@ CriticalMass/
 # Install dependency
 pip install numpy
 
-# Run full test suite (35 tests)
+# Run full test suite (37 tests)
 python3 test_bot.py
 
 # Tournament: NeuralForge vs Greedy vs Minimax vs Random
@@ -172,6 +175,22 @@ Against Greedy and Minimax bots, the game ends at **turn 26** — the bot elimin
 
 ---
 
+## 🔌 Competition Interface
+
+The bot implements the **official competition function signature**:
+
+```python
+def get_move(state, player_id):
+    """
+    state     : 12x8 board — list of lists of (owner_id, orb_count) tuples
+                Empty cell = (None, 0)
+    player_id : 0 = Red (first player), 1 = Green (second player)
+    Returns   : (row, col) tuple
+    """
+```
+
+---
+
 ## 📋 Submission Details
 
 | Item | Detail |
@@ -181,7 +200,8 @@ Against Greedy and Minimax bots, the game ends at **turn 26** — the bot elimin
 | Submission file | `NeuralForge_bot.py` |
 | Strategy document | `NeuralForge_Strategy.pdf` |
 | Deadline | 28 March 2026, 12:00 PM IST |
-| Allowed libraries | NumPy, Pandas, PyTorch, TensorFlow |
+| Submit via | Google Form (registration link) |
+| Allowed libraries | NumPy (used), Pandas, PyTorch, TensorFlow |
 | Threads | None — fully compliant |
 
 ---
@@ -196,10 +216,13 @@ Against Greedy and Minimax bots, the game ends at **turn 26** — the bot elimin
 | Search algorithm | Iterative deepening Alpha-Beta, depths 1–12 |
 | Time management | `_Timeout` exception at 0.85s, best answer returned |
 | Precomputation | Critical mass map + neighbour list at import time |
+| Unit tests | 37 tests — board, explosion, chains, timing, interface |
 
 ---
 
 ## 👤 Author
 
-**Kocherla Koteswara Suhith Sravan Babu**  
+**Kocherla Koteswara Suhith Sravan Babu**
+B.Tech CSE — SRM Institute of Science and Technology, Trichy
+
 [![GitHub](https://img.shields.io/badge/GitHub-Kocherlasuhith12-black?style=flat&logo=github)](https://github.com/Kocherlasuhith12)
