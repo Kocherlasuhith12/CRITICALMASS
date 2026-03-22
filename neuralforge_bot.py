@@ -528,19 +528,43 @@ def get_best_move(orbs, owners, player, move_count):
 # SECTION 11: COMPETITION ENTRY POINT
 # ═══════════════════════════════════════════════════════════
 
-def get_move(board, player, move_count=0):
+def get_move(state, player_id):
     """
-    Called by the competition runner each turn.
-
-    board = {
-        'orbs':   2D list (8x12) — orb counts
-        'owners': 2D list (8x12) — RED=1, GREEN=2, EMPTY=0
-    }
-    player     = RED (1) or GREEN (2)
-    move_count = total moves played so far
-
-    Returns: (row, col)
+    ╔══════════════════════════════════════════════════════╗
+    ║  OFFICIAL COMPETITION INTERFACE — do not rename      ║
+    ╠══════════════════════════════════════════════════════╣
+    ║  state     : 12x8 board matrix (list of lists)       ║
+    ║              Each cell = (owner_id, orb_count)       ║
+    ║              Empty cell = (None, 0)                  ║
+    ║  player_id : 0 (Red/first player) or 1 (Green)       ║
+    ║  Returns   : (row, col) tuple                        ║
+    ╚══════════════════════════════════════════════════════╝
     """
-    orbs   = np.array(board['orbs'],   dtype=np.int32)
-    owners = np.array(board['owners'], dtype=np.int32)
+    # Convert competition format → internal format
+    # player_id 0 → RED (1), player_id 1 → GREEN (2)
+    player = RED if player_id == 0 else GREEN
+    opponent = GREEN if player == RED else RED
+
+    orbs   = np.zeros((ROWS, COLS), dtype=np.int32)
+    owners = np.zeros((ROWS, COLS), dtype=np.int32)
+
+    move_count = 0  # estimate from board state
+
+    for r in range(ROWS):
+        for c in range(COLS):
+            cell = state[r][c]
+            owner_id, orb_count = cell[0], cell[1]
+
+            orbs[r][c] = orb_count
+
+            if owner_id is None or orb_count == 0:
+                owners[r][c] = EMPTY
+            elif owner_id == 0:
+                owners[r][c] = RED
+            else:
+                owners[r][c] = GREEN
+
+            if orb_count > 0:
+                move_count += 1  # rough estimate
+
     return get_best_move(orbs, owners, player, move_count)
