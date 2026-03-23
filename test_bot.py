@@ -69,7 +69,7 @@ check(ow2[1][0] == RED, "Below  (1,0) owned by RED")
 print("\n[5] apply_move() — chain reaction")
 o, ow = make_state()
 o[0][0]  = 1; ow[0][0]  = RED    # corner with 1 orb
-o[0][1]  = 2; ow[0][1]  = GREEN  # edge with 2 orbs (needs 1 more)
+o[0][1]  = 2; ow[0][1]  = GREEN  # edge with 2 orbs (needs 1 more to explode)
 o2, ow2 = apply_move(o, ow, 0, 0, RED)
 # RED at (0,0): now 2 orbs = CM → explodes → sends to (0,1) and (1,0)
 # (0,1): now 3 orbs = CM → explodes → enemy captured
@@ -96,16 +96,16 @@ o[0][0] = 1; ow[0][0] = RED
 o[0][1] = 1; ow[0][1] = GREEN
 vm_red   = get_valid_moves(ow, RED)
 vm_green = get_valid_moves(ow, GREEN)
-check((0,0) in vm_red,      "RED can play on own cell (0,0)")
-check((0,1) not in vm_red,  "RED cannot play on GREEN cell (0,1)")
-check((0,1) in vm_green,    "GREEN can play on own cell (0,1)")
-check((0,0) not in vm_green,"GREEN cannot play on RED cell (0,0)")
+check((0,0) in vm_red,       "RED can play on own cell (0,0)")
+check((0,1) not in vm_red,   "RED cannot play on GREEN cell (0,1)")
+check((0,1) in vm_green,     "GREEN can play on own cell (0,1)")
+check((0,0) not in vm_green, "GREEN cannot play on RED cell (0,0)")
 
 # ── Test 8: Winner detection ─────────────────────────────
 print("\n[8] get_winner()")
 o, ow = make_state()
 o[0][0] = 1; ow[0][0] = GREEN
-check(get_winner(o, ow, 2)  is None,  "move_count=2 → no winner (too early)")
+check(get_winner(o, ow, 2)  is None,  "total_orbs=2 → no winner (too early)")
 check(get_winner(o, ow, 10) == GREEN, "Only GREEN orbs → GREEN wins")
 o2, ow2 = make_state()
 o2[3][5] = 2; ow2[3][5] = RED

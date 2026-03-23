@@ -3,7 +3,11 @@ visualize.py — Watch the bot play live in your terminal
 Usage: python3 visualize.py
 """
 
-from NeuralForge_bot import *
+from NeuralForge_bot import (
+    ROWS, COLS, RED, GREEN, EMPTY,
+    make_state, apply_move, get_winner, get_valid_moves, get_best_move
+)
+import numpy as np
 import random, os, time
 
 def clear():
@@ -36,10 +40,8 @@ def print_board(orbs, owners, turn):
         print(row_str)
 
     print()
-    r_total = int(sum(orbs[r][c] for r in range(ROWS)
-                      for c in range(COLS) if owners[r][c] == RED))
-    g_total = int(sum(orbs[r][c] for r in range(ROWS)
-                      for c in range(COLS) if owners[r][c] == GREEN))
+    r_total = int(np.sum(orbs[owners == RED]))
+    g_total = int(np.sum(orbs[owners == GREEN]))
 
     bar_total = max(r_total + g_total, 1)
     r_bar = int((r_total / bar_total) * 30)
@@ -54,10 +56,11 @@ def main():
     current      = RED
 
     for turn in range(400):
+        total_orbs = int(np.sum(orbs))
         print_board(orbs, owners, turn)
         time.sleep(0.35)
 
-        winner = get_winner(orbs, owners, turn)
+        winner = get_winner(orbs, owners, total_orbs)
         if winner:
             print_board(orbs, owners, turn)
             if winner == RED:
@@ -67,7 +70,7 @@ def main():
             break
 
         if current == RED:
-            mv = get_best_move(orbs, owners, current, turn)
+            mv = get_best_move(orbs, owners, current, total_orbs)
         else:
             moves = get_valid_moves(owners, current)
             mv    = random.choice(moves) if moves else None

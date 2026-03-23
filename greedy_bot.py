@@ -21,9 +21,9 @@ def greedy_score(orbs, owners, row, col, player):
 
     new_orbs, new_owners = apply_move(orbs, owners, row, col, player)
 
-    my_orbs_before  = count_orbs(orbs, owners, player)
+    my_orbs_before  = count_orbs(orbs,     owners,     player)
     my_orbs_after   = count_orbs(new_orbs, new_owners, player)
-    opp_orbs_before = count_orbs(orbs, owners, opponent)
+    opp_orbs_before = count_orbs(orbs,     owners,     opponent)
     opp_orbs_after  = count_orbs(new_orbs, new_owners, opponent)
 
     # Orbs gained + opponent orbs lost

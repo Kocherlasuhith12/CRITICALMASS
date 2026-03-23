@@ -15,11 +15,11 @@ from NeuralForge_bot import (
 SEARCH_DEPTH = 2
 
 
-def minimax_evaluate(orbs, owners, player, move_count):
+def minimax_evaluate(orbs, owners, player, total_orbs):
     """Simple heuristic — orb count + cell count advantage."""
     opponent = GREEN if player == RED else RED
 
-    winner = get_winner(orbs, owners, move_count)
+    winner = get_winner(orbs, owners, total_orbs)
     if winner == player:   return 50_000
     if winner == opponent: return -50_000
 
@@ -28,7 +28,6 @@ def minimax_evaluate(orbs, owners, player, move_count):
     my_cells  = count_cells(owners, player)
     opp_cells = count_cells(owners, opponent)
 
-    # Near-critical bonus
     near_crit_me  = 0
     near_crit_opp = 0
     for r in range(ROWS):
@@ -45,21 +44,21 @@ def minimax_evaluate(orbs, owners, player, move_count):
     )
 
 
-def minimax(orbs, owners, depth, is_maximizing, player, move_count):
+def minimax(orbs, owners, depth, is_maximizing, player, total_orbs):
     """Plain Minimax — no Alpha-Beta, fixed depth."""
     opponent   = GREEN if player == RED else RED
     cur_player = player if is_maximizing else opponent
 
-    winner = get_winner(orbs, owners, move_count)
+    winner = get_winner(orbs, owners, total_orbs)
     if winner is not None:
         return (50_000 if winner == player else -50_000), None
 
     if depth == 0:
-        return minimax_evaluate(orbs, owners, player, move_count), None
+        return minimax_evaluate(orbs, owners, player, total_orbs), None
 
     moves = get_valid_moves(owners, cur_player)
     if not moves:
-        return minimax_evaluate(orbs, owners, player, move_count), None
+        return minimax_evaluate(orbs, owners, player, total_orbs), None
 
     best_move = moves[0]
 
@@ -67,7 +66,7 @@ def minimax(orbs, owners, depth, is_maximizing, player, move_count):
         best_val = -float('inf')
         for mv in moves:
             no, nw = apply_move(orbs, owners, mv[0], mv[1], cur_player)
-            val, _ = minimax(no, nw, depth-1, False, player, move_count+1)
+            val, _ = minimax(no, nw, depth-1, False, player, total_orbs+1)
             if val > best_val:
                 best_val  = val
                 best_move = mv
@@ -76,7 +75,7 @@ def minimax(orbs, owners, depth, is_maximizing, player, move_count):
         best_val = float('inf')
         for mv in moves:
             no, nw = apply_move(orbs, owners, mv[0], mv[1], cur_player)
-            val, _ = minimax(no, nw, depth-1, True, player, move_count+1)
+            val, _ = minimax(no, nw, depth-1, True, player, total_orbs+1)
             if val < best_val:
                 best_val  = val
                 best_move = mv
@@ -85,16 +84,16 @@ def minimax(orbs, owners, depth, is_maximizing, player, move_count):
 
 def get_move(orbs, owners, player, move_count=0):
     """Minimax depth-2: strongest typical student submission."""
-    import time
     moves = get_valid_moves(owners, player)
     if not moves:
         return None
 
+    total_orbs = int(orbs.sum())
+
     # Safety: if too many moves, cap search to avoid timeout
     if len(moves) > 40:
-        # Quick greedy fallback on first few moves
         from greedy_bot import get_move as greedy_mv
         return greedy_mv(orbs, owners, player, move_count)
 
-    _, mv = minimax(orbs, owners, SEARCH_DEPTH, True, player, move_count)
+    _, mv = minimax(orbs, owners, SEARCH_DEPTH, True, player, total_orbs)
     return mv

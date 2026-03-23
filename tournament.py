@@ -37,23 +37,25 @@ def orb_winner(orbs, owners):
 def play_game(neuralforge_player, opponent_get_move, label):
     """
     Play one game. NeuralForge is neuralforge_player (RED or GREEN).
-    opponent_get_move(orbs, owners, player, move_count) -> (r,c)
+    opponent_get_move(orbs, owners, player, total_orbs) -> (r,c)
     Returns (winner, turns, margin)
     """
     orbs, owners = make_state()
     current      = RED
 
     for turn in range(MAX_TURNS):
-        w = get_winner(orbs, owners, turn)
+        total_orbs = int(np.sum(orbs))
+
+        w = get_winner(orbs, owners, total_orbs)
         if w:
             margin = count_orbs(orbs, owners, w) - count_orbs(orbs, owners,
                      GREEN if w == RED else RED)
             return w, turn, margin
 
         if current == neuralforge_player:
-            mv = get_best_move(orbs, owners, current, turn)
+            mv = get_best_move(orbs, owners, current, total_orbs)
         else:
-            mv = opponent_get_move(orbs, owners, current, turn)
+            mv = opponent_get_move(orbs, owners, current, total_orbs)
 
         if mv is None:
             break
@@ -130,22 +132,22 @@ def main():
     scoreboard = []
 
     # Matchup 1: vs Random
-    def random_fn(orbs, owners, player, move_count):
+    def random_fn(orbs, owners, player, total_orbs):
         return random_move(owners, player)
 
     pct, margin = run_matchup("Random Bot", random_fn)
     scoreboard.append(("Random Bot",  pct, margin))
 
     # Matchup 2: vs Greedy
-    def greedy_fn(orbs, owners, player, move_count):
-        return greedy_bot.get_move(orbs, owners, player, move_count)
+    def greedy_fn(orbs, owners, player, total_orbs):
+        return greedy_bot.get_move(orbs, owners, player, total_orbs)
 
     pct, margin = run_matchup("Greedy Bot", greedy_fn)
     scoreboard.append(("Greedy Bot",  pct, margin))
 
     # Matchup 3: vs Minimax depth-2
-    def minimax_fn(orbs, owners, player, move_count):
-        return minimax_bot.get_move(orbs, owners, player, move_count)
+    def minimax_fn(orbs, owners, player, total_orbs):
+        return minimax_bot.get_move(orbs, owners, player, total_orbs)
 
     pct, margin = run_matchup("Minimax Bot (depth-2)", minimax_fn)
     scoreboard.append(("Minimax Bot", pct, margin))
