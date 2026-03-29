@@ -201,5 +201,5 @@ Against Greedy and Minimax bots, the game ends at **turn 26** — the bot elimin
 
 ## Author
 
-**Kocherla Koteswara Suhith Sravan Babu**  
+**KKS Suhith Babu**  
 [![GitHub](https://img.shields.io/badge/GitHub-Kocherlasuhith12-black?style=flat&logo=github)](https://github.com/Kocherlasuhith12)
