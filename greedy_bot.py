@@ -3,7 +3,7 @@ greedy_bot.py — Greedy opponent bot
 Strategy: Always picks the move with the highest IMMEDIATE score.
 No lookahead. No search. Just instant gratification.
 This is what most beginner students submit.
-"""
+""" 
 
 from NeuralForge_bot import (
     ROWS, COLS, RED, GREEN, EMPTY,
