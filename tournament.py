@@ -6,7 +6,7 @@ Usage: python3 tournament.py
 
 import random, time, sys
 import numpy as np
-
+ 
 from NeuralForge_bot import (
     ROWS, COLS, RED, GREEN, EMPTY,
     make_state, apply_move, get_winner,
