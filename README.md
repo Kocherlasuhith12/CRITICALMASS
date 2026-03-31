@@ -7,7 +7,7 @@
 ![Python](https://img.shields.io/badge/PYTHON-3.10+-2563eb?style=for-the-badge&logo=python&logoColor=white)
 ![NJACK](https://img.shields.io/badge/NJACK-IIT_Patna-7c3aed?style=for-the-badge)
 ![Apeiron](https://img.shields.io/badge/APEIRON-2026-059669?style=for-the-badge)
-
+ 
 <br/>
 
 > **An Alpha-Beta Minimax AI bot engineered to dominate Chain Reaction.**  
