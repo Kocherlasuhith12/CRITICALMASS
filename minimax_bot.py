@@ -5,7 +5,7 @@ This represents the ceiling of what most CS students implement
 in a competition week. A tough but beatable opponent.
 """
 
-from NeuralForge_bot import (
+from NeuralForge_bot import ( 
     ROWS, COLS, RED, GREEN, EMPTY,
     CRITICAL_MASS, NEIGHBORS,
     make_state, apply_move, get_winner, get_valid_moves,
