@@ -1,7 +1,7 @@
 """
 visualize.py — Watch the bot play live in your terminal
 Usage: python3 visualize.py
-"""
+""" 
 
 from NeuralForge_bot import (
     ROWS, COLS, RED, GREEN, EMPTY,
